@@ -10,34 +10,40 @@ Pupil is a multi-purpose validation library for JavaScript and PHP that supports
 ## Usage
 
 ### JavaScript
+Include `PupilFull.min.js` or `PupilLite.min.js` in your project.  
+`PupilFull` includes some default validation functions (such as `min` and `max`) while `PupilLite` doesn't.
+
 The following example:
+```javascript
+// Create a validator instance
+var Validator = new window.Pupil.Validator();
 
-    // Create a validator instance
-    var Validator = new window.Pupil.Validator();
-    
-    // Add a validator function
-    Validator.addFunction("min", function(value, min) {
-      return parseFloat(value) >= min;
-    });
-    
-    // Validate two numbers with the same rule
-    var result = Validator.validate({
-      test: [5, "min:10"],
-      test2: [15, "min:10"]
-    });
-    
-    console.log(result);
+// Add a validator function
+Validator.addFunction("min", function(value, min) {
+  return parseFloat(value) >= min;
+});
+
+// Validate two numbers with the same rule
+var result = Validator.validate({
+  test: [5, "min:10"],
+  test2: [15, "min:10"]
+});
+
+console.log(result);
+```
 Will output:
-
-    [test: false, test2: true]
+```javascript
+[test: false, test2: true]
+```
 
 #### Deeply nested rules
+
 The following example:
-
-    Validator.validate({
-      test: [18, "min:5 && (max:10 || between:15,20)"]
-    });
-
+```javascript
+Validator.validate({
+  test: [18, "min:5 && (max:10 || between:15,20)"]
+});
+```
 Would return true, as even though 18 is over the given "max", it's between 15 and 20, which is marked as an "OR" rule alongside "max:10".
 ## TODO
 * Concatenate and minify the JS files
