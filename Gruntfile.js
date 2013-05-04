@@ -52,6 +52,20 @@ module.exports = function(grunt) {
         dest: 'js-release/PupilFull.js'
       }
     },
+
+    copy: {
+      plugins: {
+        files: [
+          {
+            expand: true,
+            cwd: 'js/plugins/',
+            src: ['*'],
+            dest: 'js-release/plugins/'
+          }
+        ]
+      }
+    },
+
     uglify: {
       /*options: {
         banner: '<%= banner %>'
@@ -64,6 +78,18 @@ module.exports = function(grunt) {
       lite: {
         src: '<%= concat.lite.dest %>',
         dest: 'js-release/PupilLite.min.js'
+      },
+
+      plugins: {
+        files: [
+          {
+            expand: true,
+            cwd: 'js/plugins/',
+            src: '*.js',
+            dest: 'js-release/plugins/',
+            ext: '.min.js'
+          }
+        ]
       }
     },
 
@@ -92,10 +118,11 @@ module.exports = function(grunt) {
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'concat', 'copy', 'uglify']);
 
 };
