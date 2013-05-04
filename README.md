@@ -109,5 +109,7 @@ var isValid = FormValidator.validateSingle(exampleInput, "min:2 && max:64");
 ```
 
 ## TODO
+* Add comments to some parts that are missing them
+  * Also update some comments
 * Start work on the PHP version
 * Add parser caching
