@@ -68,7 +68,7 @@
         if (typeof rule !== "undefined" && rule !== null) {
             toValidate[input.name] = [input.value, rule];
         } else {
-            toValidate[input.name] = [input.value, input.getAttribute('data-validation')];
+            toValidate[input.name] = [input.value, input.getAttribute(this.options.validationAttribute)];
         }
 
         results = this.Validator.validate(toValidate);

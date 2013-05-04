@@ -5,12 +5,12 @@ module.exports = function(grunt) {
   grunt.initConfig({
     // Metadata.
     meta: {
-      version: '0.1.0'
+      version: '0.2.0'
     },
     banner: '/*! Pupil - v<%= meta.version %> - ' +
       '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
       '* Copyright (c) <%= grunt.template.today("yyyy") %> ' +
-      'Miikka Virtanen; Licensed MIT */\n',
+      'Miikka Virtanen; Licensed under MIT unless stated otherwise */\n',
     // Task configuration.
     concat: {
       /*options: {
