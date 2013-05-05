@@ -7,6 +7,18 @@ Pupil is a multi-purpose validation library for JavaScript and PHP that supports
 * Supports multiple validator instances with their own validation functions
 * Supports supplying your own lexer and/or parser
 
+# Rule strings
+The validator, regardless of language, uses *rule strings* for validation rules.  
+The following example demonstrates a complex rule string:
+```javascript
+"function && otherFunction:arg1,arg2 && (thirdFunction:arg1 || (fourthFunction && fifthFunction:arg1))"
+```
+* `&&` and `||` mean AND and OR respectively, and they are used for chaining rules.
+* Blocks `()` can be used to nest or 'group' validation rules.
+* `Functions:and,their,arguments` are separated by `:`, while the arguments are separated by `,`.
+  * Validator functions can have an unlimited number of arguments, but the first one will always be passed by the validator as the value that's being validated.
+    So, `function:arg1,arg2` would in reality get three arguments: the value being validated and arg1 and arg2.
+
 # JavaScript version
 
 ## Usage
