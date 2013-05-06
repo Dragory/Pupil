@@ -16,8 +16,8 @@ The following example demonstrates a complex rule string:
 * `&&` and `||` mean AND and OR respectively, and they are used for chaining rules.
 * Blocks `()` can be used to nest or 'group' validation rules.
 * `Functions:and,their,arguments` are separated by `:`, while the arguments are separated by `,`.
-  * Validator functions can have an unlimited number of arguments, but the first one will always be passed by the validator as the value that's being validated.
-    So, `function:arg1,arg2` would in reality get three arguments: the value being validated and arg1 and arg2.
+  * Validator functions can have an unlimited number of arguments, but the first two will always be passed by the validator as the validator itself and the value that's being validated.
+    So, `function:arg1,arg2` would in reality get four arguments: the validator instance, the value being validated, arg1 and arg2.
 
 # JavaScript version
 
