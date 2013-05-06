@@ -1,6 +1,6 @@
 (function(context) {
     context.Validator.prototype.addDefaultFunctions = function() {
-        this.addFunction("required", function(value) {
+        this.addFunction("required", function(validator, value) {
             if (typeof value === "undefined" || value === "" || value === null) {
                 return false;
             }
@@ -8,7 +8,7 @@
             return true;
         });
 
-        this.addFunction("min", function(value, min) {
+        this.addFunction("min", function(validator, value, min) {
             // If it's a number
             if ( ! isNaN(parseFloat(value)) && isFinite(value)) {
                 return value >= min;
@@ -19,7 +19,7 @@
             }
         });
 
-        this.addFunction("max", function(value, max) {
+        this.addFunction("max", function(validator, value, max) {
             // If it's a number
             if ( ! isNaN(parseFloat(value)) && isFinite(value)) {
                 return value <= max;
@@ -30,7 +30,7 @@
             }
         });
 
-        this.addFunction("between", function(value, min, max) {
+        this.addFunction("between", function(validator, value, min, max) {
             // If it's a number
             if ( ! isNaN(parseFloat(value)) && isFinite(value)) {
                 return (value >= min && value <= max);
@@ -41,9 +41,10 @@
             }
         });
 
-        // Thanks to http://badsyntax.co/post/javascript-email-validation-rfc822
-        // This validation function is licensed under a Creative Commons Attribution-ShareAlike 2.5 License or the GPL:
-        /*
+        /*!
+            Thanks to http://badsyntax.co/post/javascript-email-validation-rfc822
+            This validation function is licensed under a Creative Commons Attribution-ShareAlike 2.5 License or the GPL:
+
             --
 
              Licensed under a Creative Commons Attribution-ShareAlike 2.5 License
@@ -80,7 +81,7 @@
              Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
              http://www.gnu.org/copyleft/gpl.html
          */
-        this.addFunction("email", function(value) {
+        this.addFunction("email", function(validator, value) {
             var regex = /^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*$/;
             return regex.test(value);
         });

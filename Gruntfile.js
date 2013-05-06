@@ -13,10 +13,10 @@ module.exports = function(grunt) {
       'Miikka Virtanen; Licensed under MIT unless stated otherwise */\n',
     // Task configuration.
     concat: {
-      /*options: {
+      options: {
         banner: '<%= banner %>',
         stripBanners: true
-      },*/
+      },
       lite: {
         src: [
             'js/Init.js',
@@ -61,6 +61,23 @@ module.exports = function(grunt) {
             cwd: 'js/plugins/',
             src: ['*'],
             dest: 'js-release/plugins/'
+          }
+        ]
+      },
+
+      php: {
+        files: [
+          {
+            expand: true,
+            cwd: 'php/',
+            src: ['*'],
+            dest: 'php-release/Mivir/Pupil/'
+          },
+          {
+            expand: true,
+            cwd: 'php/',
+            src: ['*'],
+            dest: '../packagist/lib/Mivir/Pupil/'
           }
         ]
       }

@@ -1,3 +1,5 @@
+/*! Pupil - v0.2.0 - 2013-05-06
+* Copyright (c) 2013 Miikka Virtanen; Licensed under MIT unless stated otherwise */
 (function(context) {
     if ( ! String.prototype.trim) {
         String.prototype.trim = function() {
@@ -46,7 +48,8 @@
         // If we should dump our currently constructed identifier
         var shouldDumpIdentifier = false;
 
-        // What to dump after finding out what to dump
+        // Holds the current token for it to be dumped at the end of our
+        // tokens array at the end of the for block below.
         var tempToDump = [];
 
         for (var i = 0; i < cleanedString.length; i++) {
@@ -242,6 +245,8 @@
             this.Parser = new context.Parser(Lexer, BlockFactory);
         }
 
+        this.ruleValues = {};
+
         this.validationFunctions = {};
         this.addDefaultFunctions();
     };
@@ -254,14 +259,25 @@
     context.Validator.prototype.addDefaultFunctions = function() {};
 
     context.Validator.prototype.validate = function(rules) {
-        var results = [];
+        var results = [], key;
 
-        for (var key in rules) {
+        // First add all of the given values
+        // to our temporary ruleValues variable so that
+        // the validation functions can access other values too.
+        for (key in rules) {
+            this.ruleValues[key] = rules[key][0];
+        }
+
+        // Validate the rules
+        for (key in rules) {
             var value = rules[key][0];
             var rootBlock = this.Parser.parse(rules[key][1]);
 
             results[key] = this.validateBlock(value, rootBlock);
         }
+
+        // Empty ruleValues
+        this.ruleValues = {};
 
         return results;
     };
@@ -289,7 +305,7 @@
                     parameters = parts[1].split(",");
                 }
 
-                var fullParameters = [value].concat(parameters);
+                var fullParameters = [this, value].concat(parameters);
                 var functionResult = this.validationFunctions[funcName].apply(this, fullParameters);
 
                 // With OR, the result will be true if the new result is true
@@ -335,7 +351,7 @@
 })(window.Pupil);
 (function(context) {
     context.Validator.prototype.addDefaultFunctions = function() {
-        this.addFunction("required", function(value) {
+        this.addFunction("required", function(validator, value) {
             if (typeof value === "undefined" || value === "" || value === null) {
                 return false;
             }
@@ -343,7 +359,7 @@
             return true;
         });
 
-        this.addFunction("min", function(value, min) {
+        this.addFunction("min", function(validator, value, min) {
             // If it's a number
             if ( ! isNaN(parseFloat(value)) && isFinite(value)) {
                 return value >= min;
@@ -354,7 +370,7 @@
             }
         });
 
-        this.addFunction("max", function(value, max) {
+        this.addFunction("max", function(validator, value, max) {
             // If it's a number
             if ( ! isNaN(parseFloat(value)) && isFinite(value)) {
                 return value <= max;
@@ -365,7 +381,7 @@
             }
         });
 
-        this.addFunction("between", function(value, min, max) {
+        this.addFunction("between", function(validator, value, min, max) {
             // If it's a number
             if ( ! isNaN(parseFloat(value)) && isFinite(value)) {
                 return (value >= min && value <= max);
@@ -376,9 +392,10 @@
             }
         });
 
-        // Thanks to http://badsyntax.co/post/javascript-email-validation-rfc822
-        // This validation function is licensed under a Creative Commons Attribution-ShareAlike 2.5 License or the GPL:
-        /*
+        /*!
+            Thanks to http://badsyntax.co/post/javascript-email-validation-rfc822
+            This validation function is licensed under a Creative Commons Attribution-ShareAlike 2.5 License or the GPL:
+
             --
 
              Licensed under a Creative Commons Attribution-ShareAlike 2.5 License
@@ -415,7 +432,7 @@
              Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
              http://www.gnu.org/copyleft/gpl.html
          */
-        this.addFunction("email", function(value) {
+        this.addFunction("email", function(validator, value) {
             var regex = /^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*$/;
             return regex.test(value);
         });

@@ -9,6 +9,8 @@
             this.Parser = new context.Parser(Lexer, BlockFactory);
         }
 
+        this.ruleValues = {};
+
         this.validationFunctions = {};
         this.addDefaultFunctions();
     };
@@ -21,14 +23,25 @@
     context.Validator.prototype.addDefaultFunctions = function() {};
 
     context.Validator.prototype.validate = function(rules) {
-        var results = [];
+        var results = [], key;
 
-        for (var key in rules) {
+        // First add all of the given values
+        // to our temporary ruleValues variable so that
+        // the validation functions can access other values too.
+        for (key in rules) {
+            this.ruleValues[key] = rules[key][0];
+        }
+
+        // Validate the rules
+        for (key in rules) {
             var value = rules[key][0];
             var rootBlock = this.Parser.parse(rules[key][1]);
 
             results[key] = this.validateBlock(value, rootBlock);
         }
+
+        // Empty ruleValues
+        this.ruleValues = {};
 
         return results;
     };
@@ -56,7 +69,7 @@
                     parameters = parts[1].split(",");
                 }
 
-                var fullParameters = [value].concat(parameters);
+                var fullParameters = [this, value].concat(parameters);
                 var functionResult = this.validationFunctions[funcName].apply(this, fullParameters);
 
                 // With OR, the result will be true if the new result is true

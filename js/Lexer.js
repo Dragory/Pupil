@@ -23,7 +23,8 @@
         // If we should dump our currently constructed identifier
         var shouldDumpIdentifier = false;
 
-        // What to dump after finding out what to dump
+        // Holds the current token for it to be dumped at the end of our
+        // tokens array at the end of the for block below.
         var tempToDump = [];
 
         for (var i = 0; i < cleanedString.length; i++) {
