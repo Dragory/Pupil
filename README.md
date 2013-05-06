@@ -31,7 +31,7 @@ The following example:
 var Validator = new window.Pupil.Validator();
 
 // Add a validator function
-Validator.addFunction("min", function(value, min) {
+Validator.addFunction("min", function(validator, value, min) {
   return parseFloat(value) >= min;
 });
 
