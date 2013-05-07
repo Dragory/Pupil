@@ -55,6 +55,8 @@ class Validator
         $currentBoolean = false;
         $previousOperator = 1;
 
+        $negateNext = false;
+
         foreach ($block->blocks as $currentBlock) {
             $hadCurrentBlockResult = false;
             $currentBlockResult = false;
@@ -75,8 +77,7 @@ class Validator
                     $parameters = explode(",", $parts[1]);
                 }
 
-                array_unshift($parameters, $this);
-                array_unshift($parameters, $value);
+                $parameters = array_merge(array($this, $value), $parameters);
 
                 $hadCurrentBlockResult = true;
                 $currentBlockResult = call_user_func_array($this->validationFunctions[$funcName], $parameters);
@@ -93,8 +94,19 @@ class Validator
                 $currentBlockResult = $this->validateBlock($value, $currentBlock);
             }
 
+            // A negation
+            elseif ($currentBlock->type == 4) {
+                $negateNext = true;
+            }
+
             // If we had any results, see how that goes with the previous operator
             if ($hadCurrentBlockResult) {
+                // Should we negate the result?
+                if ($negateNext) {
+                    $currentBlockResult = ( ! $currentBlockResult);
+                    $negateNext = false;
+                }
+
                 // With OR, the current boolean will turn to true if the current block result is true
                 if ($previousOperator == 1 && $currentBlockResult === true) {
                     $currentBoolean = true;
@@ -117,7 +129,22 @@ class Validator
 
     public function addFunction($name, $function)
     {
+        $capitalizedName = ucfirst($name);
+
         $this->validationFunctions[$name] = $function;
+        $this->validationFunctions["other" . $capitalizedName] = function() use (&$name) {
+            // [Validator, value, otherName, ...]
+            $arguments = func_get_args();
+
+            $validator = $arguments[0];
+            $otherName = $arguments[2];
+            $value = $validator->ruleValues[$otherName];
+
+            // Remove the original value and the "other's" name and add the new value in their place
+            array_splice($arguments, 1, 2, $value);
+
+            return call_user_func_array($validator->validationFunctions[$name], $arguments);
+        };
     }
 
     protected function addDefaultValidationFunctions()
@@ -126,8 +153,12 @@ class Validator
             return $value >= $min;
         });
 
-        $this->addFunction("otherEquals", function($validator, $value, $other, $min) {
-            return $validator->ruleValues[$other] >= $min;
+        $this->addFunction("equals", function($validator, $value, $equals) {
+            return $value == $equals;
+        });
+
+        $this->addFunction("between", function($validator, $value, $min, $max) {
+            return $value >= $min && $value <= $max;
         });
     }
 }

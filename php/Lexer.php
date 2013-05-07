@@ -7,6 +7,7 @@ class Lexer
     public $TOKEN_TYPE_SUB_CLOSE = 2;
     public $TOKEN_TYPE_OPERATOR = 3;
     public $TOKEN_TYPE_IDENTIFIER = 4;
+    public $TOKEN_TYPE_NEGATION = 5;
 
     public function tokenize($inputString)
     {
@@ -62,6 +63,12 @@ class Lexer
                 $tempToDump = array($this->TOKEN_TYPE_OPERATOR, 2);
 
                 $i++;
+            }
+
+            // A negation
+            elseif ($symbol == "!") {
+                $shouldDumpIdentifier = true;
+                $tempToDump = array($this->TOKEN_TYPE_NEGATION);
             }
 
             // (A part of) an identifier

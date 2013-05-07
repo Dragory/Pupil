@@ -64,6 +64,12 @@ class Parser
 
                 $currentBlock->blocks[] = $temp;
             }
+
+            else if ($token[0] == $this->lexer->TOKEN_TYPE_NEGATION) {
+                $temp = $this->blockFactory->getNegationInstance();
+                
+                $currentBlock->blocks[] = $temp;
+            }
         }
 
         if (count($blockNest) > 0) {

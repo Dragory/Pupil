@@ -36,4 +36,12 @@ class BlockFactory
 
         return $block;
     }
+
+    public function getNegationInstance()
+    {
+        $block = $this->getInstance();
+        $block->type = 4;
+
+        return $block;
+    }
 }
