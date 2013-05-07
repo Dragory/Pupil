@@ -1,4 +1,4 @@
-/*! Pupil - v0.2.0 - 2013-05-06
+/*! Pupil - v0.2.0 - 2013-05-07
 * Copyright (c) 2013 Miikka Virtanen; Licensed under MIT unless stated otherwise */
 (function(context) {
     if ( ! String.prototype.trim) {
@@ -25,10 +25,20 @@
 })(window.Pupil);
 (function(context) {
     context.Lexer = function() {
-        this.TOKEN_TYPE_SUB_OPEN = 1;   // (
-        this.TOKEN_TYPE_SUB_CLOSE = 2;  // )
-        this.TOKEN_TYPE_OPERATOR = 3;   // && and ||
-        this.TOKEN_TYPE_IDENTIFIER = 4; // Any string
+        this.tokenTypes = {
+            'TOKEN_TYPE_SUB_OPEN': 1,  // (
+            'TOKEN_TYPE_SUB_CLOSE': 2, // )
+            'TOKEN_TYPE_OPERATOR': 3,  // && and ||
+            'TOKEN_TYPE_IDENTIFIER': 4 // Any string
+        };
+
+        for (var i in this.tokenTypes) {
+            this[i] = this.tokenTypes[i];
+        }
+    };
+
+    context.Lexer.prototype.getTokenTypes = function() {
+        return this.tokenTypes;
     };
 
     /**
@@ -172,9 +182,25 @@
         this.BlockFactory = BlockFactory;
     };
 
-    context.Parser.prototype.parse = function(inputString) {
-        var tokens = this.Lexer.tokenize(inputString);
-        var blocks = this.tokensToBlocks(tokens);
+    context.Parser.prototype.parse = function(input) {
+        var tokens, blocks;
+
+        // If the given input is a rule string, pass it to the lexer
+        if (typeof input === "string") {
+            tokens = this.Lexer.tokenize(input);
+        }
+
+        // If not and it's an object, assume it's an array of tokens
+        else if (typeof input === "object") {
+            tokens = input;
+        }
+
+        // If it's not either, we're dealing with something strange
+        else {
+            throw new context.ParserException("Unknown input type:" + typeof input);
+        }
+
+        blocks = this.tokensToBlocks(tokens);
 
         return blocks;
     };
@@ -253,10 +279,25 @@
 
     context.Validator.prototype.addFunction = function(name, func) {
         this.validationFunctions[name] = func;
+        this.validationFunctions['other' + name.charAt(0).toUpperCase() + name.substr(1)] = function() {
+            var args = Array.prototype.slice.call(arguments, 0);
+            var value = this.ruleValues[args[0]];
+
+            // [Validator, value, otherName, ...]
+            // Remove the original value and the "other's" name
+            // from the arguments and add the new value in their place.
+            args.splice(1, 2, value);
+
+            return func.apply(this, args);
+        };
     };
 
     // This will be overridden in the "FULL" package
     context.Validator.prototype.addDefaultFunctions = function() {};
+
+    context.Validator.prototype.getFunctions = function() {
+        return this.validationFunctions;
+    };
 
     context.Validator.prototype.validate = function(rules) {
         var results = [], key;

@@ -4,9 +4,25 @@
         this.BlockFactory = BlockFactory;
     };
 
-    context.Parser.prototype.parse = function(inputString) {
-        var tokens = this.Lexer.tokenize(inputString);
-        var blocks = this.tokensToBlocks(tokens);
+    context.Parser.prototype.parse = function(input) {
+        var tokens, blocks;
+
+        // If the given input is a rule string, pass it to the lexer
+        if (typeof input === "string") {
+            tokens = this.Lexer.tokenize(input);
+        }
+
+        // If not and it's an object, assume it's an array of tokens
+        else if (typeof input === "object") {
+            tokens = input;
+        }
+
+        // If it's not either, we're dealing with something strange
+        else {
+            throw new context.ParserException("Unknown input type:" + typeof input);
+        }
+
+        blocks = this.tokensToBlocks(tokens);
 
         return blocks;
     };

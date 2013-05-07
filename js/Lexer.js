@@ -1,9 +1,19 @@
 (function(context) {
     context.Lexer = function() {
-        this.TOKEN_TYPE_SUB_OPEN = 1;   // (
-        this.TOKEN_TYPE_SUB_CLOSE = 2;  // )
-        this.TOKEN_TYPE_OPERATOR = 3;   // && and ||
-        this.TOKEN_TYPE_IDENTIFIER = 4; // Any string
+        this.tokenTypes = {
+            'TOKEN_TYPE_SUB_OPEN': 1,  // (
+            'TOKEN_TYPE_SUB_CLOSE': 2, // )
+            'TOKEN_TYPE_OPERATOR': 3,  // && and ||
+            'TOKEN_TYPE_IDENTIFIER': 4 // Any string
+        };
+
+        for (var i in this.tokenTypes) {
+            this[i] = this.tokenTypes[i];
+        }
+    };
+
+    context.Lexer.prototype.getTokenTypes = function() {
+        return this.tokenTypes;
     };
 
     /**

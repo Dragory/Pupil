@@ -2,12 +2,48 @@
     context.FormValidator = function(userOptions) {
         this.options = {
             'validationAttribute': 'data-validation',
-            'highlightErrors': true
+            'highlightErrors': true,
+            'highlightUntouched': false
         };
 
         if (userOptions) {
             for (var i in userOptions) {
                 this.options[i] = userOptions[i];
+            }
+        }
+
+        // If we're not highlighting "unchanged" inputs,
+        // we need to listen to the inputs' changes and
+        // if we detect any changes, mark them as "changed".
+        if ( ! this.options.highlightUntouched) {
+            var inputs = this.findChildNodes(document.body, ['input', 'textarea']);
+
+            var markTouchedFunction = function() {
+                this.setAttribute('data-pupil-changed', '1');
+            };
+
+            var getIEMarkTouchedFunction = function(elem) {
+                return function() {
+                    markTouchedFunction.apply(elem);
+                };
+            };
+
+            for (var a = 0; a < inputs.length; a++) {
+                var input = inputs[a];
+
+                // Only set the attribute if it's not already set.
+                // This allows the user to define the "changed" status
+                // themselves if they wish. This can be useful when e.g.
+                // returning from a server-side validation with errors.
+                if (input.getAttribute('data-pupil-changed') === null) {
+                    input.setAttribute('data-pupil-changed', '0');
+                }
+
+                if (input.addEventListener) {
+                    input.addEventListener('change', markTouchedFunction, false);
+                } else {
+                    input.attachEvent('change', getIEMarkTouchedFunction(input));
+                }
             }
         }
 
@@ -103,7 +139,18 @@
 
             // If this input has an invalid value
             } else {
-                this.addElementHighlight(elements[i]);
+                if ( ! this.options.highlightUntouched) {
+                    var changeStatus = elements[i].getAttribute('data-pupil-changed');
+
+                    // If this element was changed or for some reason doesn't
+                    // have the attribute indicating whether it was changed or not,
+                    // highlight it.
+                    if (changeStatus === '1' || changeStatus === null) {
+                        this.addElementHighlight(elements[i]);
+                    }
+                } else {
+                    this.addElementHighlight(elements[i]);
+                }
             }
         }
     };

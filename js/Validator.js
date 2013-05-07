@@ -17,10 +17,25 @@
 
     context.Validator.prototype.addFunction = function(name, func) {
         this.validationFunctions[name] = func;
+        this.validationFunctions['other' + name.charAt(0).toUpperCase() + name.substr(1)] = function() {
+            var args = Array.prototype.slice.call(arguments, 0);
+            var value = this.ruleValues[args[0]];
+
+            // [Validator, value, otherName, ...]
+            // Remove the original value and the "other's" name
+            // from the arguments and add the new value in their place.
+            args.splice(1, 2, value);
+
+            return func.apply(this, args);
+        };
     };
 
     // This will be overridden in the "FULL" package
     context.Validator.prototype.addDefaultFunctions = function() {};
+
+    context.Validator.prototype.getFunctions = function() {
+        return this.validationFunctions;
+    };
 
     context.Validator.prototype.validate = function(rules) {
         var results = [], key;
