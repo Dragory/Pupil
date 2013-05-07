@@ -80,18 +80,35 @@
         return matchingNodes;
     };
 
-    context.FormValidator.prototype.validate = function(form, rules) {
-        var results = {};
+    context.FormValidator.prototype.validate = function(form, rules, optionOverrides) {
+        var results = {}, originalOptions = {};
 
+        // If the user wants to override some options for this validation run,
+        // keep a copy of the original options and apply the user's overrides.
+        if (optionOverrides) {
+            originalOptions = this.options;
+
+            for (var i in optionOverrides) {
+                this.options[i] = optionOverrides[i];
+            }
+        }
+
+        // Depending on input, validate by the given rules or by looking at the inputs' attributes
         if (typeof rules !== "undefined" && rules !== null) {
             results = this.validateByRules(form, rules);
         } else {
             results = this.validateByAttributes(form);
         }
 
+        // If we should highlight errors, do so
         if (this.options.highlightErrors) {
             var inputs = this.findChildNodes(form, ['input', 'textarea']);
             this.highlightErrors(inputs, results);
+        }
+
+        // If the options were overridden for this validation run, restore them to what they were originally
+        if (optionOverrides) {
+            this.options = originalOptions;
         }
 
         return results;
