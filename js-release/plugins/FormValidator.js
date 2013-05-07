@@ -18,13 +18,13 @@
         if ( ! this.options.highlightUntouched) {
             var inputs = this.findChildNodes(document.body, ['input', 'textarea']);
 
-            var markTouchedFunction = function() {
+            var markTouchedFunction = function(ev) {
                 this.setAttribute('data-pupil-changed', '1');
             };
 
             var getIEMarkTouchedFunction = function(elem) {
-                return function() {
-                    markTouchedFunction.apply(elem);
+                return function(ev) {
+                    markTouchedFunction.call(elem, ev);
                 };
             };
 
@@ -42,7 +42,7 @@
                 if (input.addEventListener) {
                     input.addEventListener('change', markTouchedFunction, false);
                 } else {
-                    input.attachEvent('change', getIEMarkTouchedFunction(input));
+                    input.attachEvent('onchange', getIEMarkTouchedFunction(input));
                 }
             }
         }
