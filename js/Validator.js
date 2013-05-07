@@ -16,8 +16,10 @@
     };
 
     context.Validator.prototype.addFunction = function(name, func) {
+        var capitalizedName = name.charAt(0).toUpperCase() + name.substr(1);
+
         this.validationFunctions[name] = func;
-        this.validationFunctions['other' + name.charAt(0).toUpperCase() + name.substr(1)] = function() {
+        this.validationFunctions['other' + capitalizedName] = function() {
             var args = Array.prototype.slice.call(arguments, 0);
             var value = this.ruleValues[args[0]];
 
@@ -26,7 +28,14 @@
             // from the arguments and add the new value in their place.
             args.splice(1, 2, value);
 
-            return func.apply(this, args);
+            return validationFunctions[name].apply(this, args);
+        };
+
+        this.validationFunctions['not' + capitalizedName] = function() {
+            return ( ! validationFunctions[name].apply(this, arguments));
+        };
+        this.validationFunctions['notOther' + capitalizedName] = function() {
+            return ( ! validationFunctions['other' + capitalizedName].apply(this, arguments));
         };
     };
 
@@ -64,9 +73,13 @@
     context.Validator.prototype.validateBlock = function(value, block) {
         var previousBoolean = false;
         var previousOperator = 1;
+        var negateNext = false;
 
         for (var i = 0; i < block.blocks.length; i++) {
             var currentBlock = block.blocks[i];
+
+            var hasBlockResult = false;
+            var blockResult = false;
 
             // Function (identifier)
             if (currentBlock.type == 1) {
@@ -85,20 +98,9 @@
                 }
 
                 var fullParameters = [this, value].concat(parameters);
-                var functionResult = this.validationFunctions[funcName].apply(this, fullParameters);
 
-                // With OR, the result will be true if the new result is true
-                if (previousOperator == 1 && functionResult) {
-                    previousBoolean = true;
-
-                // With AND, both the previous result (previousBoolean) and the current one have to be true for this to be true
-                } else if (previousOperator == 2) {
-                    if (previousBoolean && functionResult) {
-                        previousBoolean = true;
-                    } else {
-                        previousBoolean = false;
-                    }
-                }
+                hasBlockResult = true;
+                blockResult = this.validationFunctions[funcName].apply(this, fullParameters);
             }
 
             // Operator
@@ -108,7 +110,22 @@
 
             // Sub-block
             else if (currentBlock.type == 3) {
-                var blockResult = this.validateBlock(value, currentBlock);
+                hasBlockResult = true;
+                blockResult = this.validateBlock(value, currentBlock);
+            }
+
+            // Negation
+            else if (currentBlock.type == 4) {
+                negateNext = true;
+            }
+
+            // Do we have a block result to add to check with our "full" result?
+            if (hasBlockResult) {
+                // Should we negate this result?
+                if (negateNext) {
+                    blockResult = ( ! blockResult);
+                    negateNext = false;
+                }
 
                 // With OR, the result will be true if the new result is true
                 if (previousOperator == 1 && blockResult) {

@@ -33,6 +33,7 @@
     // without an expression prepending it.
     context.ChainValidator.Chain.prototype.init = function(funcName, args) {
         args = Array.prototype.slice.call(args, 0);
+
         this.addToken([this.Lexer.TOKEN_TYPE_IDENTIFIER, funcName + ":" + args.join(',')]);
 
         return this;
@@ -42,7 +43,7 @@
         this.tokenQueue.push(token);
     };
 
-    context.ChainValidator.Chain.prototype.addTokena = function(token) {
+    context.ChainValidator.Chain.prototype.addTokens = function(token) {
         this.tokenQueue = this.tokenQueue.concat(token);
     };
 
@@ -64,6 +65,20 @@
     // Attaches a chain to the current chain with the "AND" expression
     context.ChainValidator.Chain.prototype.and = function(chain) {
         this.addToken([this.Lexer.TOKEN_TYPE_OPERATOR, 2]);
+        this.addToken([this.Lexer.TOKEN_TYPE_SUB_OPEN]);
+        this.addTokens(chain.getTokens());
+        this.addToken([this.Lexer.TOKEN_TYPE_SUB_CLOSE]);
+
+        return this;
+    };
+
+    // Attaches a chain to the current chain with the "AND" expression while negating it
+    context.ChainValidator.Chain.prototype.not = function(chain, ignoreExpression) {
+        if ( ! ignoreExpression) {
+            this.addToken([this.Lexer.TOKEN_TYPE_OPERATOR, 2]);
+        }
+
+        this.addToken([this.Lexer.TOKEN_TYPE_NEGATION]);
         this.addToken([this.Lexer.TOKEN_TYPE_SUB_OPEN]);
         this.addTokens(chain.getTokens());
         this.addToken([this.Lexer.TOKEN_TYPE_SUB_CLOSE]);
@@ -123,5 +138,11 @@
 
         this[key] = getChainValidatorFunction(name, this);
         this.Chain.prototype[key] = getChainFunction(key);
+    };
+
+    // Allow starting with "not"
+    context.ChainValidator.not = function(chain) {
+        var chainInstance = new this.Chain();
+        return chainInstance.not(chain, true);
     };
 })(window.Pupil);

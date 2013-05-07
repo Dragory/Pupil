@@ -1,10 +1,11 @@
 (function(context) {
     context.Lexer = function() {
         this.tokenTypes = {
-            'TOKEN_TYPE_SUB_OPEN': 1,  // (
-            'TOKEN_TYPE_SUB_CLOSE': 2, // )
-            'TOKEN_TYPE_OPERATOR': 3,  // && and ||
-            'TOKEN_TYPE_IDENTIFIER': 4 // Any string
+              'TOKEN_TYPE_SUB_OPEN':   1 // (
+            , 'TOKEN_TYPE_SUB_CLOSE':  2 // )
+            , 'TOKEN_TYPE_OPERATOR':   3 // && and ||
+            , 'TOKEN_TYPE_IDENTIFIER': 4 // Any string
+            , 'TOKEN_TYPE_NEGATION':   5  // !
         };
 
         for (var i in this.tokenTypes) {
@@ -33,6 +34,9 @@
         // If we should dump our currently constructed identifier
         var shouldDumpIdentifier = false;
 
+        // If an escape character was detected (\), force the next one as an identifier
+        var forceNextAsIdentifier = false;
+
         // Holds the current token for it to be dumped at the end of our
         // tokens array at the end of the for block below.
         var tempToDump = [];
@@ -45,8 +49,12 @@
                 nextSymbol = cleanedString.charAt(i + 1);
             }
 
+            if (forceNextAsIdentifier) {
+                // If we're forcing the symbol as an identifier,
+                // let the IF fall through to the identifier.
+            }
             // Open a sub-block
-            if (symbol == "(") {
+            else if (symbol == "(") {
                 shouldDumpIdentifier = true;
                 tempToDump = [this.TOKEN_TYPE_SUB_OPEN];
             }
@@ -57,18 +65,24 @@
                 tempToDump = [this.TOKEN_TYPE_SUB_CLOSE];
             }
 
-            // An OR operator
+            // An OR expression
             else if (symbol == "|" && nextSymbol == "|") {
                 shouldDumpIdentifier = true;
                 tempToDump = [this.TOKEN_TYPE_OPERATOR, 1];
                 i++;
             }
 
-            // An AND operator
+            // An AND expression
             else if (symbol == "&" && nextSymbol == "&") {
                 shouldDumpIdentifier = true;
                 tempToDump = [this.TOKEN_TYPE_OPERATOR, 2];
                 i++;
+            }
+
+            // A negation
+            else if (symbol == "!") {
+                shouldDumpIdentifier = true;
+                tempToDump = [this.TOKEN_TYPE_NEGATION];
             }
 
             // An identifier

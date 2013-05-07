@@ -73,6 +73,11 @@
 
                 currentBlock.blocks.push(temp);
             }
+
+            else if (token[0] == this.Lexer.TOKEN_TYPE_NEGATION) {
+                temp = this.BlockFactory.getNegationInstance();
+                currentBlock.blocks.push(temp);
+            }
         }
 
         if (blockNest.length > 0) {

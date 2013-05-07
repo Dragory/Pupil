@@ -31,4 +31,11 @@
 
         return block;
     };
+
+    context.BlockFactory.prototype.getNegationInstance = function() {
+        var block = this.getInstance();
+        block.type = 4;
+
+        return block;
+    };
 })(window.Pupil);
