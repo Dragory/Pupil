@@ -1,3 +1,5 @@
+# This project is old and abandoned. It's just here for reference!
+
 # Pupil
 Pupil is a multi-purpose validation library for JavaScript and PHP that supports deeply nested validation rules.
 
